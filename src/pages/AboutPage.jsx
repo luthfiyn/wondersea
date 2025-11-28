@@ -11,20 +11,6 @@ export default function AboutPage() {
         WonderSea is your ultimate companion for exploring the maritime wonders of the Indonesian archipelago. 
         From the pristine pink beaches of Komodo to the underwater paradises of Raja Ampat, we help you discover, rate, and save your next tropical getaway.
       </p>
-      <div className="grid grid-cols-3 gap-4 text-center">
-         <div className="p-4 bg-white rounded-xl shadow-sm">
-           <h3 className="font-bold text-2xl text-cyan-600">17k+</h3>
-           <p className="text-xs text-gray-500 uppercase tracking-wide mt-1">Islands</p>
-         </div>
-         <div className="p-4 bg-white rounded-xl shadow-sm">
-           <h3 className="font-bold text-2xl text-cyan-600">5k+</h3>
-           <p className="text-xs text-gray-500 uppercase tracking-wide mt-1">Beaches</p>
-         </div>
-         <div className="p-4 bg-white rounded-xl shadow-sm">
-           <h3 className="font-bold text-2xl text-cyan-600">100%</h3>
-           <p className="text-xs text-gray-500 uppercase tracking-wide mt-1">Tropical</p>
-         </div>
-      </div>
     </div>
   );
 }

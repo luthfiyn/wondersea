@@ -3,17 +3,11 @@ import { Search } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import BeachCard from '../components/cards/BeachCard';
 
+
 export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
   const [beaches, setBeaches] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProvince, setFilterProvince] = useState('All');
-  
-  // Mock Data jika Supabase kosong (untuk testing UI)
-  const MOCK_BEACHES = [
-    { id: 'b1', name: 'Pink Beach', province: 'NTT', location: 'Komodo', rating: 4.8, image_url: 'https://images.unsplash.com/photo-1501179691660-2f0b9125d78e?auto=format&fit=crop&q=80&w=800' },
-    { id: 'b2', name: 'Kelingking Beach', province: 'Bali', location: 'Nusa Penida', rating: 4.9, image_url: 'https://images.unsplash.com/photo-1532202802371-dc8609332a3a?auto=format&fit=crop&q=80&w=800' },
-    { id: 'b3', name: 'Raja Ampat', province: 'Papua', location: 'Wayag', rating: 5.0, image_url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800' }
-  ];
 
   useEffect(() => {
     const fetchBeaches = async () => {
@@ -21,7 +15,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
       if (!error && data.length > 0) {
         setBeaches(data);
       } else {
-        setBeaches(MOCK_BEACHES); // Fallback ke mock data
+        setBeaches(MOCK_BEACHES); 
       }
     };
     fetchBeaches();
@@ -37,13 +31,13 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-20 md:pb-0">
-      {/* Hero Section */}
-      <div className="relative rounded-3xl overflow-hidden h-64 md:h-80 shadow-xl mx-4 mt-4">
+    <div className="space-y-6 pb-24 md:pb-0">
+      {/* Hero Section dengan animasi Slide Up */}
+      <div className="relative rounded-3xl overflow-hidden h-64 md:h-80 shadow-xl mx-4 mt-4 animate-slide-up">
         <img 
-          src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80&w=1200" 
+          src="https://awsimages.detik.net.id/community/media/visual/2019/11/17/5eda442f-f2df-4863-8950-008143e43f90_169.jpeg?w=1200" 
           alt="Hero" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6 md:p-10">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-2">Discover Paradise</h2>
@@ -51,8 +45,8 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
         </div>
       </div>
 
-      {/* Search & Filter */}
-      <div className="mx-4 flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm border border-cyan-100">
+      {/* Search & Filter dengan animasi Slide Up Delay */}
+      <div className="mx-4 flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm border border-cyan-100 animate-slide-up delay-100">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3.5 text-gray-400" size={20} />
           <input 
@@ -68,7 +62,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
             <button
               key={prov}
               onClick={() => setFilterProvince(prov)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all active:scale-95 ${
                 filterProvince === prov 
                   ? 'bg-cyan-600 text-white shadow-md' 
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -80,18 +74,32 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid List dengan animasi Staggered */}
       <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredBeaches.map(beach => (
+        {filteredBeaches.map((beach, index) => (
           <BeachCard 
             key={beach.id} 
             beach={beach} 
             onClick={() => onDetail(beach)} 
             isWishlisted={wishlistIds.includes(beach.id)}
             onToggleWishlist={onToggleWishlist}
+            // Menambahkan delay bertingkat (0.1s, 0.2s, dst)
+            style={{ animationDelay: `${1000 + (index * 200)}ms` }}
           />
         ))}
+        {/* Catatan: Untuk animasi per-item bekerja sempurna, pastikan BeachCard menerima prop 'style' 
+            dan menerapkannya ke div terluar, atau bungkus BeachCard dengan div yang memiliki className="animate-slide-up" */}
       </div>
+      
+      {/* Jika ingin lebih simpel tanpa mengubah props BeachCard, gunakan wrapper ini: */}
+      {/* <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredBeaches.map((beach, index) => (
+          <div key={beach.id} className="animate-slide-up" style={{ animationDelay: `${200 + (index * 100)}ms` }}>
+            <BeachCard ... />
+          </div>
+        ))}
+      </div> 
+      */}
     </div>
   );
 }

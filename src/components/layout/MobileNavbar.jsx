@@ -1,4 +1,4 @@
-import { Home, BookOpen, Heart, User, Compass } from 'lucide-react';
+import { Home, BookOpen, Heart, User } from 'lucide-react';
 
 export default function MobileNavbar({ currentPage, onNavigate }) {
   const navItems = [
@@ -17,11 +17,14 @@ export default function MobileNavbar({ currentPage, onNavigate }) {
           <button 
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            className={`flex flex-col items-center gap-1 w-16 transition-colors ${
-              isActive ? 'text-cyan-600' : 'text-gray-400'
+            className={`flex flex-col items-center gap-1 w-16 transition-colors duration-300 ${
+              isActive ? 'text-cyan-600' : 'text-gray-400 hover:text-cyan-400'
             }`}
           >
-            <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+            {/* Tambahkan animate-pop saat aktif */}
+            <div className={`${isActive ? 'animate-pop' : ''}`}>
+              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} fill={isActive && item.id === 'wishlist' ? "currentColor" : "none"} />
+            </div>
             <span className="text-[10px] font-medium">{item.label}</span>
           </button>
         );

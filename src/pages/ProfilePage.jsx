@@ -1,16 +1,135 @@
-import { useState } from 'react';
-import { LogOut, User, Mail, Heart, BookOpen } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LogOut, User, Mail, Heart, BookOpen, Camera, Save, Loader2 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
-export default function ProfilePage({ user, wishlistCount }) {
+export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
+  // --- Auth States (Untuk Login/Register) ---
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
 
+  // --- Profile Data States (Untuk Edit Profil) ---
+  const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  // 1. Fetch Profile Data saat User Login/Component Load
+  useEffect(() => {
+    let ignore = false;
+    async function getProfile() {
+      setLoading(true);
+      
+      // Ambil user dari session untuk memastikan sinkronisasi, 
+      // tapi fallback ke props 'user' jika session belum siap
+      const { user: sessionUser } = await supabase.auth.getSession().then(({ data }) => data.session || {});
+      const currentUser = user || sessionUser;
+
+      if (currentUser) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`full_name, avatar_url`)
+          .eq('id', currentUser.id)
+          .single();
+
+        if (!ignore && data) {
+          setFullName(data.full_name || '');
+          setAvatarUrl(data.avatar_url || null);
+        }
+      }
+      setLoading(false);
+    }
+
+    if (user) getProfile();
+    return () => { ignore = true; };
+  }, [user]);
+
+  // 2. Fungsi Update Profile (Simpan Nama & Foto)
+  async function updateProfile() {
+    try {
+      setLoading(true);
+
+      if (!user) throw new Error("User tidak ditemukan.");
+
+      const updates = {
+        id: user.id,
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        updated_at: new Date(),
+      };
+
+      const { error } = await supabase.from('profiles').upsert(updates);
+
+      if (error) throw error;
+      
+      alert('Profile updated successfully!');
+      
+      // Memberitahu App.jsx agar Navbar di-refresh
+      if (onProfileUpdate) onProfileUpdate(); 
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 3. Fungsi Upload Avatar (Upload & Auto-Save)
+  async function uploadAvatar(event) {
+    try {
+      setUploading(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('Pilih gambar terlebih dahulu.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // A. Upload ke Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // B. Dapatkan URL Publik
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const newAvatarUrl = data.publicUrl;
+      
+      // Update state lokal untuk preview instan
+      setAvatarUrl(newAvatarUrl); 
+
+      // C. Simpan URL ke Database (Auto-Save)
+      // Kita sertakan fullName agar tidak tertimpa/hilang saat upsert
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({ 
+            id: user.id, 
+            avatar_url: newAvatarUrl,
+            full_name: fullName, 
+            updated_at: new Date()
+        });
+
+      if (updateError) throw updateError;
+      
+      // Refresh Navbar
+      if (onProfileUpdate) onProfileUpdate();
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  // --- Handlers Auth (Login/Logout) ---
   const handleAuth = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setAuthLoading(true);
     let result;
     if (isLogin) {
       result = await supabase.auth.signInWithPassword({ email, password });
@@ -18,48 +137,86 @@ export default function ProfilePage({ user, wishlistCount }) {
       result = await supabase.auth.signUp({ email, password });
     }
     if (result.error) alert(result.error.message);
-    setLoading(false);
+    setAuthLoading(false);
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
 
+  // --- TAMPILAN: JIKA SUDAH LOGIN (Dashboard Profil) ---
   if (user) {
     return (
-      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-cyan-100 p-8 mt-8 animate-in zoom-in-95">
-        <div className="text-center mb-8">
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user.id}`} className="w-full h-full rounded-full border-4 border-cyan-50" alt="Profile" />
-            <div className="absolute bottom-0 right-0 bg-green-400 w-6 h-6 rounded-full border-2 border-white"></div>
+      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-cyan-100 p-8 mt-8 animate-in zoom-in-95 pb-24">
+        <div className="text-center mb-8 relative">
+          
+          {/* Avatar Area */}
+          <div className="relative w-32 h-32 mx-auto mb-4 group">
+            <img 
+              src={avatarUrl || `https://api.dicebear.com/7.x/notionists/svg?seed=${user.id}`} 
+              className="w-full h-full rounded-full border-4 border-cyan-50 object-cover shadow-md" 
+              alt="Profile" 
+            />
+            {/* Overlay Kamera saat Hover */}
+            <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+              {uploading ? <Loader2 className="animate-spin" /> : <Camera size={24} />}
+              <span className="text-xs font-medium mt-1">{uploading ? 'Uploading' : 'Change'}</span>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={uploadAvatar}
+                disabled={uploading}
+              />
+            </label>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">Traveler</h2>
-          <p className="text-gray-500 text-sm font-mono mt-1">ID: {user.id.substring(0,8)}...</p>
+
+          {/* Edit Display Name */}
+          <div className="mb-2">
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Display Name</label>
+            <input 
+              type="text" 
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your name"
+              className="text-2xl font-bold text-gray-800 text-center w-full border-b border-transparent hover:border-cyan-200 focus:border-cyan-500 focus:outline-none bg-transparent py-1 transition-colors placeholder-gray-300"
+            />
+          </div>
+          <p className="text-gray-500 text-xs font-mono">{user.email}</p>
         </div>
 
+        {/* Statistik & Tombol Aksi */}
         <div className="space-y-3">
+          {/* Stats Cards */}
           <div className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-50 text-gray-700">
             <div className="flex items-center gap-3">
               <Heart size={20} className="text-red-500" />
-              <span>Saved Destinations</span>
+              <span className="font-medium">Saved Destinations</span>
             </div>
             <span className="font-bold text-gray-900">{wishlistCount}</span>
           </div>
-          <div className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-50 text-gray-700">
-            <div className="flex items-center gap-3">
-              <BookOpen size={20} className="text-cyan-600" />
-              <span>Guides Read</span>
-            </div>
-            <span className="font-bold text-gray-900">0</span>
-          </div>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition font-bold mt-8">
-            <LogOut size={20} /> Sign Out
+
+
+          {/* Save Button */}
+          <button 
+            onClick={updateProfile} 
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-cyan-600 text-white hover:bg-cyan-700 transition font-bold shadow-lg shadow-cyan-200 mt-6"
+          >
+            {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />} 
+            {loading ? 'Saving...' : 'Save Changes'}
+          </button>
+
+          {/* Logout Button */}
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl text-red-500 hover:bg-red-50 transition font-medium text-sm mt-2">
+            <LogOut size={18} /> Sign Out
           </button>
         </div>
       </div>
     );
   }
 
+  // --- TAMPILAN: JIKA BELUM LOGIN (Login/Register Form) ---
   return (
     <div className="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-cyan-100 p-8 mt-8 animate-in zoom-in-95">
       <h2 className="text-2xl font-bold text-cyan-900 mb-6 text-center">{isLogin ? 'Welcome Back' : 'Join WonderSea'}</h2>
@@ -78,8 +235,8 @@ export default function ProfilePage({ user, wishlistCount }) {
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-200" placeholder="••••••••" />
           </div>
         </div>
-        <button type="submit" disabled={loading} className="w-full bg-cyan-600 text-white font-bold py-3 rounded-xl hover:bg-cyan-700 transition disabled:opacity-50">
-          {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
+        <button type="submit" disabled={authLoading} className="w-full bg-cyan-600 text-white font-bold py-3 rounded-xl hover:bg-cyan-700 transition disabled:opacity-50">
+          {authLoading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
         </button>
       </form>
       <p className="text-center mt-6 text-gray-600">
