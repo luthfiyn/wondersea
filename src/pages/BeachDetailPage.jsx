@@ -49,6 +49,7 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
 
   // 3. Update Review
   const handleUpdateReview = async (rating, comment) => {
+    // Pastikan kolom updated_at ada di DB, jika error, hapus property updated_at
     const { error } = await supabase
       .from('reviews')
       .update({ rating, comment, updated_at: new Date() }) 
@@ -81,12 +82,11 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
   };
 
   return (
-    // CONTAINER UTAMA: Memberikan padding agar tidak full-screen mentok
     <div className="animate-in slide-in-from-bottom-4 duration-500 min-h-screen pb-10 px-4 md:px-8 pt-6">
       
       <div className="max-w-4xl mx-auto">
         
-        {/* --- 1. TOMBOL BACK (Style Teks Sederhana) --- */}
+        {/* Tombol Back */}
         <button 
           onClick={onBack}
           className="mb-4 flex items-center gap-2 text-gray-500 hover:text-cyan-700 transition-colors font-medium group"
@@ -97,17 +97,14 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
           Back to Explore
         </button>
 
-        {/* --- 2. CARD WRAPPER UTAMA --- */}
+        {/* Card Utama */}
         <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-cyan-100">
           
-          {/* A. Hero Image di dalam Card */}
+          {/* Hero Image */}
           <div className="relative h-64 md:h-96 w-full">
             <img src={beach.image_url} alt={beach.name} className="w-full h-full object-cover" />
-            
-            {/* Gradient Overlay agar teks terbaca */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             
-            {/* Judul & Lokasi di atas Gambar */}
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
                <div className="flex items-center gap-2 mb-2 opacity-90 text-sm font-medium">
                  <span className="bg-cyan-500/90 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-xs uppercase tracking-wider shadow-sm">
@@ -121,10 +118,10 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
             </div>
           </div>
 
-          {/* B. Konten Detail (About, Reviews, dll) */}
+          {/* Konten Detail */}
           <div className="p-6 md:p-8">
              
-             {/* Rating & Wishlist Bar */}
+             {/* Rating & Wishlist */}
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-gray-100 pb-6">
                 <div className="flex items-center gap-3">
                    <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
@@ -148,13 +145,13 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                 </button>
              </div>
 
-             {/* About Section */}
+             {/* About */}
              <div className="mb-8">
                <h3 className="font-bold text-lg text-gray-900 mb-3">About</h3>
                <p className="text-gray-600 leading-relaxed text-base">{beach.description}</p>
              </div>
 
-             {/* Location Section */}
+             {/* Location */}
              <div className="mb-8">
                <h3 className="font-bold text-lg text-gray-900 mb-3">Location</h3>
                <div className="rounded-2xl overflow-hidden h-64 bg-gray-100 relative border border-gray-200 shadow-inner">
@@ -168,11 +165,10 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                </div>
              </div>
 
-             {/* Reviews Section */}
+             {/* Reviews */}
              <div>
                <h3 className="font-bold text-lg text-gray-900 mb-4">Traveler Reviews</h3>
                
-               {/* Form Create Review */}
                {!editingReviewId && (
                  <div className="mb-8 bg-cyan-50/30 p-5 rounded-2xl border border-cyan-100">
                     <h4 className="text-sm font-bold text-cyan-800 mb-3">Write a review</h4>
@@ -180,7 +176,6 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                  </div>
                )}
                
-               {/* List Reviews */}
                <div className="space-y-6">
                  {reviews.length > 0 ? (
                    reviews.map(review => (
@@ -215,9 +210,9 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                                 </div>
                               </div>
 
-                              {/* Edit/Delete Buttons */}
+                              {/* PERBAIKAN DI SINI: Tombol Edit/Delete */}
                               {user && user.id === review.user_id && (
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                                   <button onClick={() => setEditingReviewId(review.id)} className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition" title="Edit">
                                     <Pencil size={16} />
                                   </button>
