@@ -8,7 +8,6 @@ export default function DesktopNavbar({ currentPage, onNavigate, user, profile }
     { id: 'about', label: 'About' },
   ];
 
-  // Tentukan Display Name & Avatar
   const displayName = profile?.full_name || 'Traveler';
   const displayAvatar = profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id || 'guest'}`;
 
