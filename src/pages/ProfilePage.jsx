@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { LogOut, User, Mail, Heart, BookOpen, Camera, Save, Loader2 } from 'lucide-react';
+import { LogOut, User, Mail, Heart, Camera, Save, Loader2, ChevronRight } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
-export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
+export default function ProfilePage({ user, wishlistCount, onProfileUpdate, onNavigate }) {
   // --- Auth States (Untuk Login/Register) ---
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +21,6 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
     async function getProfile() {
       setLoading(true);
       
-      // Ambil user dari session untuk memastikan sinkronisasi, 
-      // tapi fallback ke props 'user' jika session belum siap
       const { user: sessionUser } = await supabase.auth.getSession().then(({ data }) => data.session || {});
       const currentUser = user || sessionUser;
 
@@ -65,7 +63,6 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
       
       alert('Profile updated successfully!');
       
-      // Memberitahu App.jsx agar Navbar di-refresh
       if (onProfileUpdate) onProfileUpdate(); 
 
     } catch (error) {
@@ -99,12 +96,10 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
       // B. Dapatkan URL Publik
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       const newAvatarUrl = data.publicUrl;
-      
-      // Update state lokal untuk preview instan
+  
       setAvatarUrl(newAvatarUrl); 
 
       // C. Simpan URL ke Database (Auto-Save)
-      // Kita sertakan fullName agar tidak tertimpa/hilang saat upsert
       const { error: updateError } = await supabase
         .from('profiles')
         .upsert({ 
@@ -144,7 +139,7 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
     await supabase.auth.signOut();
   };
 
-  // --- TAMPILAN: JIKA SUDAH LOGIN (Dashboard Profil) ---
+  // TAMPILAN: JIKA SUDAH LOGIN
   if (user) {
     return (
       <div className="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-cyan-100 p-8 mt-8 animate-in zoom-in-95 pb-24">
@@ -187,28 +182,34 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
 
         {/* Statistik & Tombol Aksi */}
         <div className="space-y-3">
-          {/* Stats Cards */}
-          <div className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-50 text-gray-700">
+          <button 
+            onClick={() => onNavigate('wishlist')}
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-50 text-gray-700 hover:bg-cyan-50 hover:text-cyan-800 transition-all cursor-pointer group border border-transparent hover:border-cyan-100 active:scale-[0.98]"
+          >
             <div className="flex items-center gap-3">
-              <Heart size={20} className="text-red-500" />
+              <div className="p-2 bg-white rounded-lg shadow-sm group-hover:shadow text-red-500">
+                 <Heart size={20} className="fill-red-500" />
+              </div>
               <span className="font-medium">Saved Destinations</span>
             </div>
-            <span className="font-bold text-gray-900">{wishlistCount}</span>
-          </div>
-
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-gray-900 group-hover:text-cyan-700">{wishlistCount}</span>
+              <ChevronRight size={16} className="text-gray-400 group-hover:text-cyan-500" />
+            </div>
+          </button>
 
           {/* Save Button */}
           <button 
             onClick={updateProfile} 
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-cyan-600 text-white hover:bg-cyan-700 transition font-bold shadow-lg shadow-cyan-200 mt-6"
+            className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-cyan-600 text-white hover:bg-cyan-700 transition font-bold shadow-lg shadow-cyan-200 mt-6 active:scale-[0.98]"
           >
             {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />} 
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
 
           {/* Logout Button */}
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl text-red-500 hover:bg-red-50 transition font-medium text-sm mt-2">
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl text-red-500 hover:bg-red-50 transition font-medium text-sm mt-2 active:scale-[0.98]">
             <LogOut size={18} /> Sign Out
           </button>
         </div>
@@ -216,7 +217,7 @@ export default function ProfilePage({ user, wishlistCount, onProfileUpdate }) {
     );
   }
 
-  // --- TAMPILAN: JIKA BELUM LOGIN (Login/Register Form) ---
+  // TAMPILAN: JIKA BELUM LOGIN 
   return (
     <div className="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-cyan-100 p-8 mt-8 animate-in zoom-in-95">
       <h2 className="text-2xl font-bold text-cyan-900 mb-6 text-center">{isLogin ? 'Welcome Back' : 'Join WonderSea'}</h2>

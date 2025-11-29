@@ -35,8 +35,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    // --- LOGIKA SPLASH SCREEN ---
-    // Tampilkan splash screen selama 2.5 detik
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2500);
@@ -134,6 +132,7 @@ export default function App() {
           user={user} 
           wishlistCount={wishlistIds.length} 
           onProfileUpdate={() => fetchUserProfile(user.id)}
+          onNavigate={setView}
         />;
       case 'about': 
         return <AboutPage onNavigate={setView} />;
