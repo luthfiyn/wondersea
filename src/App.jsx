@@ -8,11 +8,14 @@ import AboutPage from './pages/AboutPage';
 import BeachDetailPage from './pages/BeachDetailPage';
 import MobileNavbar from './components/layout/MobileNavbar';
 import DesktopNavbar from './components/layout/DesktopNavbar';
+import SplashScreen from './components/layout/SplashScreen';
+import PWABadge from './PWABadge';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [view, setView] = useState('home');
   const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null); // State baru untuk menyimpan data profil
+  const [userProfile, setUserProfile] = useState(null);
   const [selectedBeach, setSelectedBeach] = useState(null);
   const [wishlistIds, setWishlistIds] = useState([]);
 
@@ -32,21 +35,30 @@ export default function App() {
   };
 
   useEffect(() => {
+    // --- LOGIKA SPLASH SCREEN ---
+    // Tampilkan splash screen selama 2.5 detik
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
     // 1. Auth Listener
     supabase.auth.getSession().then(({ data: { session } }) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      if (currentUser) fetchUserProfile(currentUser.id); // Ambil profil saat load
+      if (currentUser) fetchUserProfile(currentUser.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      if (currentUser) fetchUserProfile(currentUser.id); // Ambil profil saat auth berubah
+      if (currentUser) fetchUserProfile(currentUser.id);
       else setUserProfile(null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -121,15 +133,20 @@ export default function App() {
         return <ProfilePage 
           user={user} 
           wishlistCount={wishlistIds.length} 
-          onProfileUpdate={() => fetchUserProfile(user.id)} // Pass fungsi refresh ke sini
+          onProfileUpdate={() => fetchUserProfile(user.id)}
         />;
-      case 'about': return <AboutPage />;
+      case 'about': 
+        return <AboutPage onNavigate={setView} />;
       default: return <HomePage />;
     }
   };
 
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
   return (
-    <div className="relative min-h-screen font-sans text-gray-800 overflow-hidden">
+    <div className="relative min-h-screen font-sans text-gray-800 overflow-hidden animate-in fade-in duration-700">
       
       {/* Background Layer */}
       <div className="fixed inset-0 -z-10 bg-cyan-50">
@@ -139,7 +156,6 @@ export default function App() {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
       </div>
 
-      {/* Pass userProfile ke Navbar */}
       <DesktopNavbar currentPage={view} onNavigate={setView} user={user} profile={userProfile} />
       
       <main className="max-w-6xl mx-auto pt-4 md:pt-0 relative z-10">
@@ -149,6 +165,8 @@ export default function App() {
       {view !== 'detail' && (
         <MobileNavbar currentPage={view} onNavigate={setView} />
       )}
+
+      <PWABadge />
     </div>
   );
 }

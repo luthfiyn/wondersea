@@ -5,7 +5,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Tambahkan Kode Berikut di Bawah */
 @layer utilities {
   .animate-slide-up {
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -39,20 +38,15 @@ body {
   100% { transform: scale(1); }
 }
 
-/* ... kode sebelumnya ... */
-
 @layer utilities {
-  /* Animasi Blob untuk Background */
   .animate-blob {
     animation: blob 7s infinite;
   }
   
-  /* Animasi Float (Mengambang naik-turun) */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
   
-  /* Utility untuk delay animasi */
   .animation-delay-2000 {
     animation-delay: 2s;
   }

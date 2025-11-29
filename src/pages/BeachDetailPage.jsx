@@ -49,7 +49,6 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
 
   // 3. Update Review
   const handleUpdateReview = async (rating, comment) => {
-    // Pastikan kolom updated_at ada di DB, jika error, hapus property updated_at
     const { error } = await supabase
       .from('reviews')
       .update({ rating, comment, updated_at: new Date() }) 
@@ -210,7 +209,7 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                                 </div>
                               </div>
 
-                              {/* PERBAIKAN DI SINI: Tombol Edit/Delete */}
+                              {/* Tombol Edit/Delete */}
                               {user && user.id === review.user_id && (
                                 <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                                   <button onClick={() => setEditingReviewId(review.id)} className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition" title="Edit">
@@ -234,7 +233,6 @@ export default function BeachDetailPage({ beach, onBack, user, isWishlisted, onT
                  )}
                </div>
              </div>
-
           </div>
         </div>
       </div>

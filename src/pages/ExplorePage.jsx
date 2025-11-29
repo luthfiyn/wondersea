@@ -14,7 +14,6 @@ export default function ExplorePage({ onDetail }) {
       const { data } = await supabase.from('beaches').select('*');
       if (data) {
         setBeaches(data);
-        // Ekstrak provinsi unik
         const uniqueProvs = ['All', ...new Set(data.map(b => b.province))];
         setProvinces(uniqueProvs);
       }

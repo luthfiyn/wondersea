@@ -3,7 +3,6 @@ import { Heart, Compass } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import BeachCard from '../components/cards/BeachCard';
 
-// Tambahkan 'onNavigate' di props
 export default function WishlistPage({ user, onDetail, wishlistIds, onToggleWishlist, onNavigate }) {
   const [wishlistBeaches, setWishlistBeaches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +47,6 @@ export default function WishlistPage({ user, onDetail, wishlistIds, onToggleWish
            <p className="text-cyan-800 font-medium animate-pulse">Loading your wishlist...</p>
         </div>
       ) : wishlistBeaches.length === 0 ? (
-        // TAMPILAN KOSONG DENGAN TOMBOL
         <div className="text-center py-24 bg-white/80 backdrop-blur-sm rounded-3xl border border-dashed border-cyan-200 shadow-sm flex flex-col items-center">
           <div className="text-6xl mb-4 animate-bounce">🏝️</div>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Your wishlist is empty</h3>

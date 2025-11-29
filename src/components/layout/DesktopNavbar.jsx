@@ -15,7 +15,7 @@ export default function DesktopNavbar({ currentPage, onNavigate, user, profile }
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-cyan-100 shadow-sm px-4 py-3 hidden md:flex justify-between items-center">
       <div className="flex items-center gap-2 cursor-pointer group" onClick={() => onNavigate('home')}>
-         <img src="/wgwgw.png" alt="WonderSea Logo" className="w-10 h-10 object-contain rounded-xl group-hover:rotate-12 transition-transform duration-300"/>
+         <img src="/icon.png" alt="WonderSea Logo" className="w-10 h-10 object-contain rounded-xl group-hover:rotate-12 transition-transform duration-300"/>
           <h1 className="text-2xl font-bold text-cyan-900 tracking-tight">WonderSea</h1>
       </div>
       

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { BookOpen, ChevronLeft, Calendar, Anchor, Clock, ArrowRight, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
 
-// --- DATA DUMMY "NIAT" & LENGKAP ---
 const GUIDES_DATA = [
   {
     id: 1,
@@ -94,7 +93,7 @@ const GUIDES_DATA = [
 export default function GuidePage() {
   const [selectedGuide, setSelectedGuide] = useState(null);
 
-  // --- TAMPILAN DETAIL GUIDE (READING MODE) ---
+  // TAMPILAN DETAIL GUIDE (READING MODE)
   if (selectedGuide) {
     return (
       <div className="animate-in slide-in-from-right-4 duration-500 min-h-screen bg-white pb-20">
@@ -144,7 +143,7 @@ export default function GuidePage() {
              "{selectedGuide.excerpt}"
            </p>
            
-           {/* Render HTML Content dengan aman untuk Dummy Data */}
+           {/* Render HTML Content untuk Dummy Data */}
            <div 
              className="prose prose-cyan prose-lg text-gray-800 leading-loose text-justify"
              dangerouslySetInnerHTML={{ __html: selectedGuide.content }}
@@ -168,7 +167,7 @@ export default function GuidePage() {
     );
   }
 
-  // --- TAMPILAN LIST GUIDE (GRID) ---
+  // LIST GUIDES
   return (
     <div className="animate-in fade-in duration-500 p-6 pb-32 max-w-7xl mx-auto">
       
