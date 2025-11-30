@@ -5,10 +5,9 @@ export default function BeachCard({ beach, onClick, isWishlisted, onToggleWishli
     <div 
       onClick={onClick}
       style={style}
-      className="group bg-white rounded-2xl overflow-hidden border border-cyan-50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-95 animate-slide-up opacity-0" 
+      className="group bg-white rounded-2xl overflow-hidden border border-cyan-50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-95 animate-slide-up opacity-0 h-fit" 
     >
       <div className="relative h-48 overflow-hidden">
-        {/* Zoom effect pada gambar saat hover */}
         <img 
           src={beach.image_url} 
           alt={beach.name} 
@@ -40,9 +39,12 @@ export default function BeachCard({ beach, onClick, isWishlisted, onToggleWishli
         </div>
       </div>
       
-      <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-800 group-hover:text-cyan-700 transition-colors line-clamp-1">{beach.name}</h3>
-        <div className="flex items-center gap-1 text-gray-500 text-sm mt-1">
+      <div className="px-4 py-3">
+        <h3 className="font-bold text-lg text-gray-800 group-hover:text-cyan-700 transition-colors line-clamp-1">
+            {beach.name}
+        </h3>
+        
+        <div className="flex items-center gap-1 text-gray-500 text-sm mt-0.5">
           <MapPin size={14} className="text-cyan-500" />
           {beach.province}
         </div>

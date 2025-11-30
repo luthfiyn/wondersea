@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, ChevronDown, MapPin } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import BeachCard from '../components/cards/BeachCard';
 
-export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
+export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNavigate }) {
   const [beaches, setBeaches] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProvince, setFilterProvince] = useState('All');
   
-  // STATE PAGINATION
+  // --- STATE PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 3; 
 
   useEffect(() => {
     const fetchBeaches = async () => {
       const { data, error } = await supabase.from('beaches').select('*');
-      if (!error && data.length > 0) {
+      if (!error && data?.length > 0) {
         setBeaches(data);
       } else {
         setBeaches([]); 
@@ -45,7 +45,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
   const currentBeaches = filteredBeaches.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredBeaches.length / itemsPerPage);
 
-  // 3. Ganti Halaman
+  // 3. Fungsi Ganti Halaman
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 300, behavior: 'smooth' }); 
@@ -56,7 +56,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
       {/* Hero Section */}
       <div className="relative rounded-3xl overflow-hidden h-64 md:h-80 shadow-xl mx-4 mt-4 animate-slide-up">
         <img 
-          src="https://awsimages.detik.net.id/community/media/visual/2019/11/17/5eda442f-f2df-4863-8950-008143e43f90_169.jpeg?w=1200" 
+          src="/raja.jpg" 
           alt="Hero" 
           className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
         />
@@ -66,8 +66,10 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
         </div>
       </div>
 
-      {/* Search & Filter */}
+      {/* Search & Dropdown Filter Section */}
       <div className="mx-4 flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm border border-cyan-100 animate-slide-up delay-100">
+        
+        {/* Search Input */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3.5 text-gray-400" size={20} />
           <input 
@@ -78,24 +80,34 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-          {provinces.map(prov => (
-            <button
-              key={prov}
-              onClick={() => setFilterProvince(prov)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all active:scale-95 ${
-                filterProvince === prov 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {prov}
-            </button>
-          ))}
+
+        {/* 2. Dropdown Filter Provinsi */}
+        <div className="relative min-w-[200px]">
+          <div className="absolute left-3 top-3.5 text-gray-500 pointer-events-none z-10">
+            <MapPin size={18} />
+          </div>
+          
+          <select
+            value={filterProvince}
+            onChange={(e) => setFilterProvince(e.target.value)}
+            className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 pl-10 pr-10 rounded-xl focus:outline-none focus:bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all cursor-pointer font-medium"
+          >
+            {provinces.map((prov) => (
+              <option key={prov} value={prov}>
+                {prov === 'All' ? 'All Locations' : prov}
+              </option>
+            ))}
+          </select>
+          
+          {/* Custom Arrow Icon di Kanan */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+            <ChevronDown size={18} />
+          </div>
         </div>
+
       </div>
 
-      {/* Grid List (Menampilkan currentBeaches) */}
+      {/* Grid List */}
       <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
         {currentBeaches.length > 0 ? (
           currentBeaches.map((beach, index) => (
@@ -105,7 +117,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
               onClick={() => onDetail(beach)} 
               isWishlisted={wishlistIds.includes(beach.id)}
               onToggleWishlist={onToggleWishlist}
-              style={{ animationDelay: `${100 + (index * 100)}ms` }} // Delay dipercepat
+              style={{ animationDelay: `${100 + (index * 100)}ms` }}
             />
           ))
         ) : (
@@ -115,10 +127,9 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
         )}
       </div>
 
-      {/* PAGINATION CONTROLS */}
+      {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 px-4 py-6 animate-slide-up delay-200">
-          {/* Previous Button */}
+        <div className="flex justify-center items-center gap-3 px-3 animate-slide-up delay-200">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -127,7 +138,6 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
             <ChevronLeft size={20} />
           </button>
 
-          {/* Page Indicator */}
           <div className="flex gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
@@ -144,7 +154,6 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist }) {
             ))}
           </div>
 
-          {/* Next Button */}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
