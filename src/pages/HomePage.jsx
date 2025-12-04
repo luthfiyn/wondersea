@@ -10,7 +10,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
   
   // --- STATE PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3; 
+  const itemsPerPage = 4; 
 
   useEffect(() => {
     const fetchBeaches = async () => {
@@ -56,7 +56,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
       {/* Hero Section */}
       <div className="relative rounded-3xl overflow-hidden h-64 md:h-80 shadow-xl mx-4 mt-4 animate-slide-up">
         <img 
-          src="/raja.jpg" 
+          src="https://awsimages.detik.net.id/community/media/visual/2019/11/17/5eda442f-f2df-4863-8950-008143e43f90_169.jpeg?w=1200" 
           alt="Hero" 
           className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
         />
@@ -81,7 +81,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
           />
         </div>
 
-        {/* 2. Dropdown Filter Provinsi */}
+        {/* Dropdown Filter Provinsi */}
         <div className="relative min-w-[200px]">
           <div className="absolute left-3 top-3.5 text-gray-500 pointer-events-none z-10">
             <MapPin size={18} />
@@ -99,7 +99,6 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
             ))}
           </select>
           
-          {/* Custom Arrow Icon di Kanan */}
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
             <ChevronDown size={18} />
           </div>
@@ -107,8 +106,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
 
       </div>
 
-      {/* Grid List */}
-      <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
+      <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 min-h-[400px]">
         {currentBeaches.length > 0 ? (
           currentBeaches.map((beach, index) => (
             <BeachCard 
@@ -129,7 +127,7 @@ export default function HomePage({ onDetail, wishlistIds, onToggleWishlist, onNa
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 px-3 animate-slide-up delay-200">
+        <div className="flex justify-center items-center gap-3 px-4 py-6 animate-slide-up delay-200">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
